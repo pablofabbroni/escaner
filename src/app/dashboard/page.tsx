@@ -172,7 +172,10 @@ export default function UploadPage() {
           router.push('/dashboard/metrics');
         }, 1500);
       } else {
-        setErrorMsg(data.message || 'Error al guardar los datos.');
+        const fullMsg = data.details
+          ? `${data.message} Detalle: ${data.details}`
+          : (data.message || 'Error al guardar los datos.');
+        setErrorMsg(fullMsg);
       }
     } catch (err) {
       setErrorMsg('Error de conexión al guardar el comprobante.');
