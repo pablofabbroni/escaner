@@ -15,9 +15,9 @@ import {
 
 interface OcrData {
   fechaEmision: string;
-  cuitEmisor: string;
   cuitReceptor: string;
   tipoComprobante: string;
+  condicionReceptor: string;
   puntoVenta: string;
   nroComprobante: string;
   total: number;
@@ -37,9 +37,9 @@ export default function UploadPage() {
   const [isValidating, setIsValidating] = useState(false);
   const [formData, setFormData] = useState<OcrData>({
     fechaEmision: '',
-    cuitEmisor: '',
     cuitReceptor: '',
     tipoComprobante: 'A',
+    condicionReceptor: '',
     puntoVenta: '',
     nroComprobante: '',
     total: 0
@@ -122,9 +122,9 @@ export default function UploadPage() {
         }
         setFormData({
           fechaEmision: data.ocrData.fechaEmision || '',
-          cuitEmisor: data.ocrData.cuitEmisor || '',
           cuitReceptor: data.ocrData.cuitReceptor || '',
           tipoComprobante: data.ocrData.tipoComprobante || 'A',
+          condicionReceptor: data.ocrData.condicionReceptor || '',
           puntoVenta: data.ocrData.puntoVenta || '',
           nroComprobante: data.ocrData.nroComprobante || '',
           total: data.ocrData.total || 0,
@@ -404,21 +404,6 @@ export default function UploadPage() {
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-1.5">
                         <label className="text-xs font-semibold text-slate-500 tracking-wider uppercase block">
-                          CUIT Emisor
-                        </label>
-                        <input
-                          type="text"
-                          name="cuitEmisor"
-                          required
-                          placeholder="30-71112222-6"
-                          value={formData.cuitEmisor}
-                          onChange={handleInputChange}
-                          className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-slate-500 tracking-wider uppercase block">
                           CUIT Receptor
                         </label>
                         <input
@@ -427,6 +412,21 @@ export default function UploadPage() {
                           required
                           placeholder="20-33444555-8"
                           value={formData.cuitReceptor}
+                          onChange={handleInputChange}
+                          className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-500 tracking-wider uppercase block">
+                          Condición del Receptor frente al IVA
+                        </label>
+                        <input
+                          type="text"
+                          name="condicionReceptor"
+                          required
+                          placeholder="IVA Responsable Inscripto / Responsable Monotributo"
+                          value={formData.condicionReceptor}
                           onChange={handleInputChange}
                           className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
                         />

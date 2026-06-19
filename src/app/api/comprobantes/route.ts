@@ -6,9 +6,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       fechaEmision,
-      cuitEmisor,
       cuitReceptor,
       tipoComprobante,
+      condicionReceptor,
       puntoVenta,
       nroComprobante,
       total,
@@ -17,9 +17,9 @@ export async function POST(request: Request) {
     // Validaciones
     if (
       !fechaEmision ||
-      !cuitEmisor ||
       !cuitReceptor ||
       !tipoComprobante ||
+      !condicionReceptor ||
       !puntoVenta ||
       !nroComprobante ||
       total === undefined
@@ -50,9 +50,9 @@ export async function POST(request: Request) {
     const comprobante = await prisma.comprobante.create({
       data: {
         fechaEmision: parsedDate,
-        cuitEmisor,
         cuitReceptor,
         tipoComprobante,
+        condicionReceptor,
         puntoVenta,
         nroComprobante,
         total: numericTotal,

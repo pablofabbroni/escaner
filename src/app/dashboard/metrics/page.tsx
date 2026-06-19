@@ -17,9 +17,9 @@ import {
 interface Comprobante {
   id: number;
   fechaEmision: string;
-  cuitEmisor: string;
   cuitReceptor: string;
   tipoComprobante: string;
+  condicionReceptor: string;
   puntoVenta: string;
   nroComprobante: string;
   total: number;
@@ -239,8 +239,8 @@ export default function MetricsPage() {
                         <th className="px-6 py-4">Fecha</th>
                         <th className="px-6 py-4">Tipo</th>
                         <th className="px-6 py-4">Número</th>
-                        <th className="px-6 py-4">CUIT Emisor</th>
                         <th className="px-6 py-4">CUIT Receptor</th>
+                        <th className="px-6 py-4">Condición Receptor</th>
                         <th className="px-6 py-4 text-right">Total</th>
                       </tr>
                     </thead>
@@ -262,10 +262,10 @@ export default function MetricsPage() {
                             {item.puntoVenta} - {item.nroComprobante}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap font-mono text-xs">
-                            {item.cuitEmisor}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap font-mono text-xs">
                             {item.cuitReceptor}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-500">
+                            {item.condicionReceptor}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-slate-900">
                             {formatCurrency(item.total)}

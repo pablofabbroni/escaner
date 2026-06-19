@@ -91,19 +91,19 @@ function generateMockOcrData(filename: string) {
   
   let total = 85400.00;
   let tipoComprobante = 'A';
-  let cuitEmisor = '30-71112222-6';
   let cuitReceptor = '20-33444555-8';
+  let condicionReceptor = 'IVA Responsable Inscripto';
   let puntoVenta = '0004';
   let nroComprobante = '00008432';
   
   if (cleanName.includes('factura_c') || cleanName.includes('monotributo')) {
     tipoComprobante = 'C';
     total = 12500.00;
-    cuitEmisor = '27-35666777-9';
+    condicionReceptor = 'Responsable Monotributo';
   } else if (cleanName.includes('ticket') || cleanName.includes('b')) {
     tipoComprobante = 'B';
     total = 3850.50;
-    cuitEmisor = '30-44555666-2';
+    condicionReceptor = 'Consumidor Final';
     puntoVenta = '0012';
     nroComprobante = '00192843';
   }
@@ -114,9 +114,9 @@ function generateMockOcrData(filename: string) {
 
   return {
     fechaEmision: dateStr,
-    cuitEmisor,
     cuitReceptor,
     tipoComprobante,
+    condicionReceptor,
     puntoVenta,
     nroComprobante,
     total

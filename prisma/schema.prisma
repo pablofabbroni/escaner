@@ -7,13 +7,13 @@ datasource db {
 }
 
 model Comprobante {
-  id              Int      @id @default(autoincrement())
-  fechaEmision    DateTime
-  cuitEmisor      String
-  cuitReceptor    String
-  tipoComprobante String
-  puntoVenta      String
-  nroComprobante  String
-  total           Float
-  createdAt       DateTime @default(now())
+  id                Int      @id @default(autoincrement())
+  fechaEmision      DateTime
+  cuitReceptor      String
+  tipoComprobante   String
+  condicionReceptor String
+  puntoVenta        String
+  nroComprobante    String
+  total             Float
+  createdAt         DateTime @default(now())
 }
