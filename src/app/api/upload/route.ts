@@ -69,7 +69,7 @@ export async function POST(request: Request) {
         success: true,
         ocrData: mockOcrData,
         isMocked: true,
-        warning: 'El webhook de n8n no está disponible. Se utilizaron datos simulados.'
+        warning: `El webhook de n8n no está disponible (Detalle: ${fetchError.message}). Se utilizaron datos simulados.`
       });
     }
   } catch (error: any) {
