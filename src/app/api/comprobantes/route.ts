@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 export async function POST(request: Request) {
+  let requestData: any = {};
   try {
     const body = await request.json();
+    requestData = body;
     const {
       fechaEmision,
       cuitReceptor,
@@ -66,6 +68,60 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error('Error al guardar comprobante:', error);
+
+    // Self-healing database schema sync on table missing error
+    if (error.code === 'P2021') {
+      console.log('La tabla Comprobante no existe. Intentando sincronizar la base de datos...');
+      try {
+        const { exec } = require('child_process');
+        const { promisify } = require('util');
+        const execAsync = promisify(exec);
+        await execAsync('npx prisma db push --skip-generate');
+        console.log('Sincronización de base de datos exitosa. Reintentando guardar...');
+
+        const {
+          fechaEmision,
+          cuitReceptor,
+          tipoComprobante,
+          condicionReceptor,
+          puntoVenta,
+          nroComprobante,
+          total,
+        } = requestData;
+
+        const numericTotal = parseFloat(total);
+        const parsedDate = new Date(fechaEmision);
+
+        const comprobante = await prisma.comprobante.create({
+          data: {
+            fechaEmision: parsedDate,
+            cuitReceptor,
+            tipoComprobante,
+            condicionReceptor,
+            puntoVenta,
+            nroComprobante,
+            total: numericTotal,
+          },
+        });
+
+        return NextResponse.json({
+          success: true,
+          message: 'Comprobante guardado y validado correctamente después de sincronizar la base de datos.',
+          data: comprobante,
+        });
+      } catch (pushError: any) {
+        console.error('Fallo al sincronizar la base de datos automáticamente:', pushError);
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'La tabla no existe en la base de datos y la sincronización automática falló.',
+            details: `${error.message} | Sincronización falló con: ${pushError.message}`
+          },
+          { status: 500 }
+        );
+      }
+    }
+
     return NextResponse.json(
       {
         success: false,
@@ -100,6 +156,47 @@ export async function GET() {
     });
   } catch (error: any) {
     console.error('Error al obtener comprobantes:', error);
+
+    // Self-healing database schema sync on table missing error
+    if (error.code === 'P2021') {
+      console.log('La tabla Comprobante no existe. Intentando sincronizar la base de datos...');
+      try {
+        const { exec } = require('child_process');
+        const { promisify } = require('util');
+        const execAsync = promisify(exec);
+        await execAsync('npx prisma db push --skip-generate');
+        console.log('Sincronización de base de datos exitosa. Reintentando consulta...');
+
+        const comprobantes = await prisma.comprobante.findMany({
+          orderBy: {
+            fechaEmision: 'desc',
+          },
+        });
+
+        const count = comprobantes.length;
+        const totalAmount = comprobantes.reduce((sum, item) => sum + item.total, 0);
+
+        return NextResponse.json({
+          success: true,
+          data: comprobantes,
+          metrics: {
+            count,
+            totalAmount,
+          },
+        });
+      } catch (pushError: any) {
+        console.error('Fallo al sincronizar la base de datos automáticamente:', pushError);
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'La tabla no existe en la base de datos y la sincronización automática falló.',
+            details: `${error.message} | Sincronización falló con: ${pushError.message}`
+          },
+          { status: 500 }
+        );
+      }
+    }
+
     return NextResponse.json(
       {
         success: false,
