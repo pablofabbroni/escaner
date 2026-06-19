@@ -59,17 +59,30 @@ export async function POST(request: Request) {
       const data = Array.isArray(rawData) ? rawData[0] : rawData;
       
       let ocrData = data;
-      // Si la respuesta proviene del Agente de IA, los datos estarán en la clave 'output'
+      let rawText = '';
+      
+      // Extrae el texto ya sea del Agente de IA ('output') o del nodo directo de Gemini ('content.parts[0].text')
       if (data && typeof data.output === 'string') {
+        rawText = data.output;
+      } else if (data && data.content?.parts?.[0]?.text) {
+        rawText = data.content.parts[0].text;
+      }
+
+      if (rawText) {
         try {
           // Limpiar bloques de código markdown que Gemini suele incluir
-          const cleanOutput = data.output.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-          ocrData = JSON.parse(cleanOutput);
+          const cleanOutput = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+          const parsed = JSON.parse(cleanOutput);
+          if (parsed && typeof parsed === 'object') {
+            ocrData = normalizeOcrKeys(parsed);
+          }
         } catch (e) {
           console.error('Error al parsear el output de n8n:', e);
         }
       } else if (data && data.output && typeof data.output === 'object') {
-        ocrData = data.output;
+        ocrData = normalizeOcrKeys(data.output);
+      } else if (data && typeof data === 'object') {
+        ocrData = normalizeOcrKeys(data);
       }
 
       return NextResponse.json({
@@ -137,4 +150,35 @@ function generateMockOcrData(filename: string) {
     nroComprobante,
     total
   };
+}
+
+// Normalizador inteligente de las claves devueltas por la IA en n8n
+function normalizeOcrKeys(obj: any): any {
+  const normalized: any = {};
+  
+  const getValue = (keys: string[], defaultVal: any = '') => {
+    for (const key of keys) {
+      if (obj[key] !== undefined) return obj[key];
+      
+      const cleanKeyToFind = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const match = Object.keys(obj).find(k => {
+        const cleanK = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+        return cleanK === cleanKeyToFind;
+      });
+      if (match !== undefined) return obj[match];
+    }
+    return defaultVal;
+  };
+
+  normalized.fechaEmision = getValue(['fechaEmision', 'fecha', 'fecha_emision']);
+  normalized.cuitReceptor = getValue(['cuitReceptor', 'cuit_receptor']);
+  normalized.tipoComprobante = getValue(['tipoComprobante', 'tipo_comprobante', 'tipo']);
+  normalized.condicionReceptor = getValue(['condicionReceptor', 'condicion_receptor', 'condicionIva', 'condicion']);
+  normalized.puntoVenta = getValue(['puntoVenta', 'punto_venta', 'pv']);
+  normalized.nroComprobante = getValue(['nroComprobante', 'nro_comprobante', 'numero', 'compNro', 'comp.nro', 'comp . nro']);
+  
+  const rawTotal = getValue(['total', 'importe', 'totalImporte', 'monto']);
+  normalized.total = typeof rawTotal === 'number' ? rawTotal : parseFloat(rawTotal) || 0;
+
+  return normalized;
 }
