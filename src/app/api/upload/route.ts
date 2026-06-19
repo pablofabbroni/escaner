@@ -55,10 +55,26 @@ export async function POST(request: Request) {
         });
       }
 
-      const data = await response.json();
+      const rawData = await response.json();
+      const data = Array.isArray(rawData) ? rawData[0] : rawData;
+      
+      let ocrData = data;
+      // Si la respuesta proviene del Agente de IA, los datos estarán en la clave 'output'
+      if (data && typeof data.output === 'string') {
+        try {
+          // Limpiar bloques de código markdown que Gemini suele incluir
+          const cleanOutput = data.output.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+          ocrData = JSON.parse(cleanOutput);
+        } catch (e) {
+          console.error('Error al parsear el output de n8n:', e);
+        }
+      } else if (data && data.output && typeof data.output === 'object') {
+        ocrData = data.output;
+      }
+
       return NextResponse.json({
         success: true,
-        ocrData: data,
+        ocrData: ocrData,
         isMocked: false
       });
     } catch (fetchError: any) {
