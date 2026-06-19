@@ -76,7 +76,7 @@ export async function POST(request: Request) {
         const { exec } = require('child_process');
         const { promisify } = require('util');
         const execAsync = promisify(exec);
-        await execAsync('npx prisma db push --skip-generate');
+        await execAsync('npx prisma db push --accept-data-loss');
         console.log('Sincronización de base de datos exitosa. Reintentando guardar...');
 
         const {
@@ -164,7 +164,7 @@ export async function GET() {
         const { exec } = require('child_process');
         const { promisify } = require('util');
         const execAsync = promisify(exec);
-        await execAsync('npx prisma db push --skip-generate');
+        await execAsync('npx prisma db push --accept-data-loss');
         console.log('Sincronización de base de datos exitosa. Reintentando consulta...');
 
         const comprobantes = await prisma.comprobante.findMany({
