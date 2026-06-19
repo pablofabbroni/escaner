@@ -3,10 +3,10 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 
 const prismaClientSingleton = () => {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error('La variable de entorno DATABASE_URL no está configurada.');
-  }
+  // During next build, DATABASE_URL is not set. We fallback to a dummy connection string 
+  // to avoid build crashes, since the real URL will be injected at runtime.
+  const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/escaner_db?schema=public";
+  
   const pool = new Pool({ connectionString });
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
