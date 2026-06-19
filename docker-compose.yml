@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: escaner-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: escaner_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d escaner_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: escaner-web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/escaner_db?schema=public"
+      N8N_WEBHOOK_URL: "http://host.docker.internal:5678/webhook-test/receipt-ocr"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "npx prisma db push && npm run start"
+
+volumes:
+  postgres_data:
