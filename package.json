@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "npx prisma db push --skip-generate && next start",
+    "start": "npx prisma db push --skip-generate || echo 'Prisma db push failed'; next start",
     "lint": "eslint"
   },
   "dependencies": {
